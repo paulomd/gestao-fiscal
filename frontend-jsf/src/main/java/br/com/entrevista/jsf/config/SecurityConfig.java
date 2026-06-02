@@ -8,7 +8,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizer;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -18,6 +20,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Configuration
 @EnableWebSecurity
@@ -54,6 +57,9 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(LOGIN_OAUTH2)))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage(LOGIN_OAUTH2)
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(
+                                        authorizationRequestResolver(clientRegistrationRepository)))
                         .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                         .failureHandler((request, response, exception) -> {
                             String context = request.getContextPath();
@@ -71,8 +77,15 @@ public class SecurityConfig {
     }
 
     /** Login sempre visível e interface do Keycloak em português (Brasil). */
-    @Bean
-    OAuth2AuthorizationRequestCustomizer keycloakLoginEmPortugues() {
+    private OAuth2AuthorizationRequestResolver authorizationRequestResolver(
+            ClientRegistrationRepository clientRegistrationRepository) {
+        DefaultOAuth2AuthorizationRequestResolver resolver =
+                new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(keycloakLoginEmPortugues());
+        return resolver;
+    }
+
+    private Consumer<OAuth2AuthorizationRequest.Builder> keycloakLoginEmPortugues() {
         return customizer -> {
             Map<String, Object> params = new LinkedHashMap<>();
             params.put(OAuth2ParameterNames.PROMPT, "login");
