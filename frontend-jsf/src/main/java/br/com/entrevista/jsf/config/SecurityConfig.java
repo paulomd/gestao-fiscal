@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -88,7 +87,7 @@ public class SecurityConfig {
     private Consumer<OAuth2AuthorizationRequest.Builder> keycloakLoginEmPortugues() {
         return customizer -> {
             Map<String, Object> params = new LinkedHashMap<>();
-            params.put(OAuth2ParameterNames.PROMPT, "login");
+            params.put("prompt", "login");
             params.put("ui_locales", "pt-BR");
             customizer.additionalParameters(params);
         };

@@ -30,6 +30,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
           realm: environment.keycloak.realm,
           clientId: environment.keycloak.clientId
         },
+        // locale (ui_locales) existe no keycloak-js 18; typings do keycloak-angular não declaram
         initOptions: {
           onLoad: 'login-required',
           checkLoginIframe: false,
@@ -37,7 +38,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
           flow: 'standard',
           pkceMethod: 'S256',
           locale: 'pt-BR'
-        },
+        } as Keycloak.KeycloakInitOptions,
         loadUserProfileAtStartUp: false,
         enableBearerInterceptor: true,
         bearerExcludedUrls: ['/assets', '/realms', '/protocol']
