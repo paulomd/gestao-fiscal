@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: gestao-fiscal-jsf
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: legacy-jsf
+            client-secret: legacy-jsf-secret
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            user-name-attribute: preferred_username
+
+server:
+  port: ${SERVER_PORT:8081}
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+
+joinfaces:
+  faces-servlet:
+    url-mappings: /faces/*,*.xhtml
+    load-on-startup: 1
+  view-scope:
+    enabled: true
+  primefaces:
+    theme: saga
+  faces:
+    project-stage: Development
+    facelets-skip-comments: true
+
+app:
+  api-base-url: ${API_BASE_URL:http://localhost:8082}
+  angular-base-url: ${ANGULAR_BASE_URL:http://localhost}
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost}

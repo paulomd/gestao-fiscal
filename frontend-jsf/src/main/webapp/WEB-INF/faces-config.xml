@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="4.0" xmlns="https://jakarta.ee/xml/ns/jakartaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd">
+
+    <application>
+        <resource-bundle>
+            <base-name>messages</base-name>
+            <var>msg</var>
+        </resource-bundle>
+    </application>
+
+    <converter>
+        <converter-id>localDateConverter</converter-id>
+        <converter-class>br.com.entrevista.jsf.converter.LocalDateConverter</converter-class>
+    </converter>
+
+    <factory>
+        <exception-handler-factory>
+            br.com.entrevista.jsf.config.JsfExceptionHandlerFactory
+        </exception-handler-factory>
+    </factory>
+</faces-config>

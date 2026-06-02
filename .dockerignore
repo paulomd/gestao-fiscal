@@ -1,0 +1,14 @@
+# Reduz contexto de build e evita cache corrompido (WSL/BuildKit)
+.git
+.cursor
+**/.idea
+**/.vscode
+**/target
+**/node_modules
+**/.angular
+**/dist
+**/*.md
+**/.env
+!/.env.example
+**/agent-transcripts
+**/.cursor

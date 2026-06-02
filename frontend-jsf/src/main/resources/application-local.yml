@@ -1,0 +1,8 @@
+# Perfil local (mvn spring-boot:run fora do Docker)
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8180/realms/entrevista

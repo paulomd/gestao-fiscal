@@ -1,0 +1,44 @@
+<h2 class="page-title">Dashboard Angular</h2>
+
+<mat-card *ngIf="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Carregando estatísticas...</p>
+</mat-card>
+
+<mat-card *ngIf="!loading && erroCarregamento" class="erro-card">
+  <p>{{ erroCarregamento }}</p>
+  <button mat-raised-button color="primary" (click)="loading = true; erroCarregamento = ''; carregarEstatisticas()">
+    Tentar novamente
+  </button>
+</mat-card>
+
+<ng-container *ngIf="!loading && stats">
+  <p>Usuário: <strong>{{ nomeUsuario }}</strong> | Perfil: <strong>{{ perfil }}</strong> |
+     Token expira em: <strong>{{ tokenRemaining }}</strong></p>
+
+  <div class="card-grid">
+    <div class="stat-card">
+      <h3>Total de Alíquotas</h3>
+      <div class="value">{{ stats.totalAliquotas }}</div>
+    </div>
+    <div class="stat-card">
+      <h3>Receita Simulada</h3>
+      <div class="value" style="font-size:1.25rem">{{ stats.receitaSimulada | currency:'BRL' }}</div>
+    </div>
+    <div class="stat-card">
+      <h3>Carga Tributária Média</h3>
+      <div class="value">{{ stats.cargaTributariaMedia }}%</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:2rem; margin-top:1.5rem">
+    <mat-card class="chart-container">
+      <mat-card-title>Alíquotas por Regime</mat-card-title>
+      <canvas baseChart [data]="regimeChart.data" [type]="regimeChart.type" [options]="regimeChart.options"></canvas>
+    </mat-card>
+    <mat-card class="chart-container">
+      <mat-card-title>Distribuição dos Tributos (%)</mat-card-title>
+      <canvas baseChart [data]="tributosChart.data" [type]="tributosChart.type" [options]="tributosChart.options"></canvas>
+    </mat-card>
+  </div>
+</ng-container>

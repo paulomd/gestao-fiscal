@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <title>Sistema de Gestão Fiscal</title>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/assets/theme/corporate.css?v=7"/>
+        <h:outputStylesheet library="primefaces" name="primeicons/primeicons.css"/>
+    </h:head>
+
+    <h:body>
+        <div class="app-shell">
+            <header class="app-header">
+                <div class="brand">
+                    <i class="pi pi-building" style="margin-right:8px"></i>
+                    Sistema de Gestão Fiscal
+                </div>
+                <div class="user-info">
+                    <div>Usuário: #{sessionBean.nomeUsuario}</div>
+                    <div>Perfil: #{sessionBean.perfil}
+                        <h:outputLink value="#{navigationBean.urlLogout}" styleClass="btn-logout">Logout</h:outputLink>
+                    </div>
+                </div>
+            </header>
+
+            <div class="app-body">
+                <nav class="app-sidebar">
+                    <h:outputLink value="#{navigationBean.urlDashboard}" styleClass="menu-item">
+                        <span class="menu-icon"><i class="pi pi-home"></i></span> Dashboard
+                    </h:outputLink>
+                    <h:outputLink value="#{navigationBean.urlAliquotas}" styleClass="menu-item">
+                        <span class="menu-icon"><i class="pi pi-percentage"></i></span> Cadastro de Alíquotas
+                    </h:outputLink>
+                    <a href="#{navigationBean.urlApuracao}" class="menu-item">
+                        <span class="menu-icon"><i class="pi pi-calculator"></i></span> Apuração Fiscal
+                    </a>
+                    <a href="#{navigationBean.urlHistorico}" class="menu-item">
+                        <span class="menu-icon"><i class="pi pi-history"></i></span> Histórico de Apurações
+                    </a>
+                    <h:outputLink value="#{navigationBean.urlLogout}" styleClass="menu-item">
+                        <span class="menu-icon"><i class="pi pi-sign-out"></i></span> Logout
+                    </h:outputLink>
+                </nav>
+
+                <main class="app-content">
+                    <h:messages id="messages" globalOnly="true" showDetail="true" style="margin-bottom:1rem"/>
+                    <ui:insert name="content"/>
+                </main>
+            </div>
+
+            <footer class="app-footer">
+                Sistema de Gestão Fiscal © 2026 — Módulos Legado (JSF) e Moderno (Angular)
+            </footer>
+        </div>
+    </h:body>
+</html>

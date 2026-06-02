@@ -1,0 +1,25 @@
+# Perfil Docker: JWK via rede interna; issuer do token continua localhost:8180 (browser)
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/entrevista/protocol/openid-connect/certs
+
+app:
+  keycloak:
+    token-issuer: http://localhost:8180/realms/entrevista
+
+management:
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    db:
+      enabled: true

@@ -1,0 +1,57 @@
+.apuracao-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.apuracao-form mat-form-field {
+  min-width: 200px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.mensagem-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 54, 93, 0.45);
+  padding: 1.5rem;
+}
+
+.mensagem-centro {
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem 2.5rem;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.mensagem-centro--erro {
+  border-top: 5px solid #e53e3e;
+}
+
+.mensagem-centro--sucesso {
+  border-top: 5px solid #38a169;
+}
+
+.mensagem-centro--info {
+  border-top: 5px solid #3182ce;
+}
+
+.mensagem-centro-texto {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+  color: #2d3748;
+}

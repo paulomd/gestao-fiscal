@@ -1,0 +1,65 @@
+<h2 class="page-title">Apuração Fiscal</h2>
+
+<div *ngIf="mensagem" class="mensagem-overlay" role="alertdialog" aria-modal="true">
+  <div class="mensagem-centro" [ngClass]="'mensagem-centro--' + mensagem.tipo">
+    <p class="mensagem-centro-texto">{{ mensagem.texto }}</p>
+    <button mat-raised-button color="primary" type="button" (click)="fecharMensagem()">Fechar</button>
+  </div>
+</div>
+
+<mat-card>
+  <mat-card-content>
+    <form [formGroup]="form" class="apuracao-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Competência (MM/yyyy)</mat-label>
+        <input matInput formControlName="competencia" placeholder="06/2026">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Receita Bruta (R$)</mat-label>
+        <input matInput type="number" formControlName="receitaBruta">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Regime Tributário</mat-label>
+        <mat-select formControlName="regimeTributario">
+          <mat-option *ngFor="let r of regimes" [value]="r">{{ r }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-raised-button color="primary" type="button" (click)="buscarAliquotas()">
+          Ver Alíquotas
+        </button>
+        <button mat-raised-button color="accent" type="button" (click)="calcular()" [disabled]="form.invalid || calculando">
+          Calcular Tributos
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="aliquota" style="margin-top:1rem">
+  <mat-card-title>Alíquotas — {{ aliquota.regimeTributario }}</mat-card-title>
+  <mat-card-content>
+    PIS: {{ aliquota.pis }}% | COFINS: {{ aliquota.cofins }}% |
+    IRPJ: {{ aliquota.irpj }}% | CSLL: {{ aliquota.csll }}%
+  </mat-card-content>
+</mat-card>
+
+<ng-container *ngIf="resultado">
+  <h3 style="margin-top:1.5rem">Resultado da Apuração</h3>
+  <div class="result-cards">
+    <div class="stat-card"><h3>PIS</h3><div class="value">{{ resultado.pis | currency:'BRL' }}</div></div>
+    <div class="stat-card"><h3>COFINS</h3><div class="value">{{ resultado.cofins | currency:'BRL' }}</div></div>
+    <div class="stat-card"><h3>IRPJ</h3><div class="value">{{ resultado.irpj | currency:'BRL' }}</div></div>
+    <div class="stat-card"><h3>CSLL</h3><div class="value">{{ resultado.csll | currency:'BRL' }}</div></div>
+    <div class="stat-card"><h3>Total</h3><div class="value">{{ resultado.totalTributos | currency:'BRL' }}</div></div>
+    <div class="stat-card"><h3>Carga Tributária</h3><div class="value">{{ resultado.cargaTributaria }}%</div></div>
+  </div>
+
+  <mat-card class="chart-container">
+    <mat-card-title>Composição Tributária</mat-card-title>
+    <canvas baseChart [data]="composicaoChart.data" [type]="composicaoChart.type"></canvas>
+  </mat-card>
+</ng-container>

@@ -1,0 +1,8 @@
+# Perfil local (mvn spring-boot:run): Keycloak acessível em localhost:8180
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/entrevista}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/entrevista/protocol/openid-connect/certs}

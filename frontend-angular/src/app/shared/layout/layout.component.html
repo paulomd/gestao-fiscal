@@ -1,0 +1,45 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand">
+      <mat-icon>account_balance</mat-icon>
+      Sistema de Gestão Fiscal
+    </div>
+    <div class="user-info">
+      <div>Usuário: {{ nomeUsuario }}</div>
+      <div>Perfil: {{ perfil }}
+        <a class="btn-logout" (click)="logout()" href="javascript:void(0)">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav class="app-sidebar">
+      <a routerLink="/dashboard-angular" routerLinkActive="active" class="menu-item">
+        <mat-icon>home</mat-icon> Dashboard Angular
+      </a>
+      <a [href]="urlDashboardJsf()" class="menu-item">
+        <mat-icon>dashboard</mat-icon> Dashboard JSF
+      </a>
+      <a [href]="urlAliquotasJsf()" class="menu-item">
+        <mat-icon>percent</mat-icon> Cadastro de Alíquotas
+      </a>
+      <a routerLink="/apuracao-fiscal" routerLinkActive="active" class="menu-item">
+        <mat-icon>calculate</mat-icon> Apuração Fiscal
+      </a>
+      <a routerLink="/historico" routerLinkActive="active" class="menu-item">
+        <mat-icon>history</mat-icon> Histórico de Apurações
+      </a>
+      <a class="menu-item" (click)="logout()" href="javascript:void(0)">
+        <mat-icon>logout</mat-icon> Logout
+      </a>
+    </nav>
+
+    <main class="app-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <footer class="app-footer">
+    Sistema de Gestão Fiscal © 2026 — Módulos Legado (JSF) e Moderno (Angular)
+  </footer>
+</div>

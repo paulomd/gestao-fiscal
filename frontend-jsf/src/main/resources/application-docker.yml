@@ -1,0 +1,33 @@
+# Perfil Docker — URLs fixas (sem issuer-uri / discovery no boot)
+server:
+  forward-headers-strategy: framework
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: legacy-jsf
+            client-secret: legacy-jsf-secret
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            # Gateway nginx (:80) — baseUrl com X-Forwarded-* deve ser http://localhost
+            redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost/login/oauth2/code/keycloak}
+        provider:
+          keycloak:
+            authorization-uri: http://localhost:8180/realms/entrevista/protocol/openid-connect/auth
+            token-uri: http://keycloak:8080/realms/entrevista/protocol/openid-connect/token
+            user-info-uri: http://keycloak:8080/realms/entrevista/protocol/openid-connect/userinfo
+            jwk-set-uri: http://keycloak:8080/realms/entrevista/protocol/openid-connect/certs
+            user-name-attribute: preferred_username
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

@@ -1,0 +1,26 @@
+@import '@angular/material/theming';
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.mat-drawer-container {
+  background: var(--bg, #f7fafc) !important;
+}
+
+.app-content mat-card {
+  margin-bottom: 1rem;
+}
+
+.result-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.chart-container {
+  max-width: 500px;
+  margin: 1rem auto;
+}

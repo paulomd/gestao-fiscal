@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core"
+      xmlns:pt="jakarta.faces.passthrough">
+
+<f:metadata>
+    <f:viewAction action="#{aliquotaBean.carregarPagina}" onPostback="false"/>
+</f:metadata>
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h2 class="page-title">Cadastro de Alíquotas</h2>
+
+        <h:form id="formAliquotas">
+            <h:inputHidden id="modoFormulario" value="#{aliquotaBean.modoFormulario}"/>
+            <h:messages id="msgsForm" globalOnly="false" showDetail="true" style="margin-bottom:1rem"/>
+
+            <p:panel header="Pesquisa" style="margin-bottom:1rem">
+                <h:panelGroup layout="block" styleClass="acoes-toolbar">
+                    <span class="acoes-toolbar-item">
+                        <p:inputText value="#{aliquotaBean.filtro}" placeholder="Regime tributário..."
+                                     style="width:300px"/>
+                    </span>
+                    <span class="acoes-toolbar-item">
+                        <p:commandButton value="Pesquisar" icon="pi pi-search" action="#{aliquotaBean.listar}"
+                                         ajax="false" process="@this"/>
+                    </span>
+                    <span class="acoes-toolbar-item">
+                        <p:button value="Nova Alíquota" icon="pi pi-plus" href="#{aliquotaBean.urlNovaAliquota}"/>
+                    </span>
+                </h:panelGroup>
+            </p:panel>
+
+            <h:panelGroup id="panelFormAliquota" layout="block" rendered="#{aliquotaBean.exibirFormulario}">
+                <p:panel header="Cadastro / Edição de Alíquota"
+                         style="margin-bottom:1rem; border:2px solid #2c5282">
+                    <p:panelGrid columns="2" styleClass="ui-fluid">
+                        <h:outputLabel value="Regime Tributário *"/>
+                        <h:selectOneMenu id="regime" value="#{aliquotaBean.selecionada.regimeTributario}"
+                                         style="width:100%">
+                            <f:selectItem itemLabel="Selecione..." itemValue=""/>
+                            <f:selectItems value="#{aliquotaBean.regimes}"/>
+                        </h:selectOneMenu>
+
+                        <h:outputLabel value="PIS (%) *"/>
+                        <h:inputText id="pis" value="#{aliquotaBean.pisText}" style="width:120px"
+                                     pt:placeholder="0" pt:type="text" pt:inputmode="decimal"/>
+
+                        <h:outputLabel value="COFINS (%) *"/>
+                        <h:inputText id="cofins" value="#{aliquotaBean.cofinsText}" style="width:120px"
+                                     pt:placeholder="0" pt:type="text" pt:inputmode="decimal"/>
+
+                        <h:outputLabel value="IRPJ (%) *"/>
+                        <h:inputText id="irpj" value="#{aliquotaBean.irpjText}" style="width:120px"
+                                     pt:placeholder="0" pt:type="text" pt:inputmode="decimal"/>
+
+                        <h:outputLabel value="CSLL (%) *"/>
+                        <h:inputText id="csll" value="#{aliquotaBean.csllText}" style="width:120px"
+                                     pt:placeholder="0" pt:type="text" pt:inputmode="decimal"/>
+
+                        <h:outputLabel value="Vigência *"/>
+                        <h:inputText id="vigencia" value="#{aliquotaBean.vigenciaInput}"
+                                     pt:type="date" style="width:160px;padding:6px"/>
+                    </p:panelGrid>
+
+                    <h:panelGroup layout="block" styleClass="acoes-toolbar" style="margin-top:1rem">
+                        <span class="acoes-toolbar-item">
+                            <p:commandButton value="Salvar" icon="pi pi-check" action="#{aliquotaBean.salvar}"
+                                             ajax="false" process="@form" update="msgsForm @form"/>
+                        </span>
+                        <span class="acoes-toolbar-item">
+                            <p:button value="Cancelar" icon="pi pi-times" href="#{aliquotaBean.urlFecharFormulario}"
+                                      styleClass="ui-button-secondary"/>
+                        </span>
+                    </h:panelGroup>
+                </p:panel>
+            </h:panelGroup>
+
+            <p:dataTable id="tabelaAliquotas" value="#{aliquotaBean.aliquotas}" var="item"
+                         paginator="true" rows="5" rowsPerPageTemplate="5,10,15"
+                         emptyMessage="Nenhuma alíquota encontrada" styleClass="p-datatable-sm"
+                         style="margin-top:1rem">
+
+                <p:column headerText="Regime" sortBy="#{item.regimeTributario}">
+                    <h:outputText value="#{item.regimeTributario}"/>
+                </p:column>
+                <p:column headerText="PIS (%)" sortBy="#{item.pis}">
+                    <h:outputText value="#{item.pis}"/>
+                </p:column>
+                <p:column headerText="COFINS (%)" sortBy="#{item.cofins}">
+                    <h:outputText value="#{item.cofins}"/>
+                </p:column>
+                <p:column headerText="IRPJ (%)" sortBy="#{item.irpj}">
+                    <h:outputText value="#{item.irpj}"/>
+                </p:column>
+                <p:column headerText="CSLL (%)" sortBy="#{item.csll}">
+                    <h:outputText value="#{item.csll}"/>
+                </p:column>
+                <p:column headerText="Vigência" sortBy="#{item.vigencia}">
+                    <h:outputText value="#{item.vigencia}">
+                        <f:converter converterId="localDateConverter"/>
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="Ações" style="width:110px" styleClass="col-acoes">
+                    <h:panelGroup layout="block" styleClass="acoes-tabela-linha">
+                        <span class="acao-btn-wrap">
+                            <p:commandButton icon="pi pi-pencil" title="Editar" iconOnly="true"
+                                             action="#{aliquotaBean.editar(item)}" ajax="false"
+                                             styleClass="ui-button-sm ui-button-rounded"/>
+                        </span>
+                        <span class="acao-btn-wrap">
+                            <p:commandButton icon="pi pi-trash" title="Excluir" iconOnly="true"
+                                             styleClass="ui-button-danger ui-button-sm ui-button-rounded"
+                                             action="#{aliquotaBean.excluir(item)}" ajax="false"
+                                             onclick="return confirm('Deseja excluir esta alíquota?');"/>
+                        </span>
+                    </h:panelGroup>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>
+</html>
