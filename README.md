@@ -2,6 +2,8 @@
 
 Aplicação demonstrativa de **evolução tecnológica gradual**: módulos legados em **JSF/PrimeFaces** convivem com novos módulos em **Angular 13**, compartilhando **API Spring Boot**, **PostgreSQL**, **Keycloak (SSO)** e **identidade visual única**.
 
+**Demo online (VPS):** [http://82.25.69.207/](http://82.25.69.207/) — login Keycloak com usuários da tabela abaixo (`admin` / `admin123` ou `fiscal` / `fiscal123`).
+
 ## Arquitetura
 
 ```
@@ -87,13 +89,14 @@ Diagnóstico opcional (se algo falhar): `bash scripts/diagnose.sh`
 
 Aguarde a primeira subida (build Maven/npm + Keycloak ~3-5 min).
 
-| Serviço | URL |
-|---------|-----|
-| Aplicação (gateway) | http://localhost |
-| API / Swagger | http://localhost:8082/swagger-ui.html |
-| Keycloak | http://localhost:8180 |
-| JSF direto | http://localhost:8081 |
-| PostgreSQL | localhost:5432 |
+| Serviço | URL (local) | URL (demo VPS) |
+|---------|-------------|----------------|
+| Aplicação (gateway) | http://localhost | http://82.25.69.207/ |
+| API / Swagger | http://localhost:8082/swagger-ui.html | http://82.25.69.207/swagger-ui.html |
+| Actuator health | http://localhost/actuator/health | http://82.25.69.207/actuator/health |
+| Keycloak | http://localhost:8180 | http://82.25.69.207:8180 |
+| JSF direto | http://localhost:8081 | — |
+| PostgreSQL | localhost:5432 | — |
 
 ## Execução local (desenvolvimento)
 
@@ -195,7 +198,7 @@ cd frontend-jsf && mvn test
 
 ## Observabilidade
 
-- **Actuator**: `/actuator/health`, `/actuator/metrics`
+- **Actuator (público via gateway):** `/actuator/health`, `/actuator/info` — ex.: [http://82.25.69.207/actuator/health](http://82.25.69.207/actuator/health)
 - **Logs estruturados** (Logstash encoder)
 - **Tratamento global de exceções** (`GlobalExceptionHandler`)
 
