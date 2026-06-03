@@ -92,9 +92,9 @@ Aguarde a primeira subida (build Maven/npm + Keycloak ~3-5 min).
 | Serviço | URL (local) | URL (demo VPS) |
 |---------|-------------|----------------|
 | Aplicação (gateway) | http://localhost | http://82.25.69.207/ |
-| API / Swagger | http://localhost:8082/swagger-ui.html | http://82.25.69.207/swagger-ui.html |
+| API / Swagger | http://localhost:8082/swagger-ui.html |  |
 | Actuator health | http://localhost/actuator/health | http://82.25.69.207/actuator/health |
-| Keycloak | http://localhost:8180 | http://82.25.69.207:8180 |
+| Keycloak | http://localhost:8180 |  |
 | JSF direto | http://localhost:8081 | — |
 | PostgreSQL | localhost:5432 | — |
 
