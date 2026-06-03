@@ -34,8 +34,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Build JSF
-        run: mvn -B -f frontend-jsf/pom.xml -DskipTests package
+      - name: Test and Build JSF
+        run: mvn -B -f frontend-jsf/pom.xml test package
 
   frontend-angular:
     runs-on: ubuntu-latest

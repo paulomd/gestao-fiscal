@@ -21,3 +21,4 @@
 .env.local
 deploy/.env
 !.env.example
+.sdkmanrc

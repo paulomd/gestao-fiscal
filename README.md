@@ -164,6 +164,35 @@ Acesse JSF em `http://localhost:8081` e Angular em `http://localhost:4200`, ou c
 | POST | `/api/apuracoes/calcular` |
 | GET | `/api/dashboard/stats` |
 
+## Testes
+
+```bash
+cd backend && mvn verify
+```
+
+Relatório JaCoCo: `backend/target/site/jacoco/index.html` (cobertura de linhas ~**87%**).
+
+| Classe de teste | Escopo |
+|-----------------|--------|
+| `AliquotaServiceTest` | CRUD, filtro, regime, exceções |
+| `ApuracaoFiscalServiceTest` | Cálculo fiscal, listar, salvar |
+| `DashboardServiceTest` | Estatísticas com/sem dados |
+| `ApiControllersIntegrationTest` | REST + validação 400/404 + JWT em `/calcular` |
+
+O CI (`ci.yml`) executa `mvn verify` no backend e `mvn test` no JSF em todo push/PR.
+
+### Testes JSF (`frontend-jsf`)
+
+```bash
+cd frontend-jsf && mvn test
+```
+
+- `LocalDateConverterTest` — datas dd/MM/yyyy e ISO  
+- `NavigationBeanTest` — URLs Angular e JSF  
+- `BackendHttpClientTest` — HTTP, Bearer, erros da API (servidor local mockado)
+
+**Demo vs produção:** senhas padrão no Compose local usam fallback (`gestao123` / `admin`); em produção vêm de `.env` ou secrets do CI (`VPS_POSTGRES_PASSWORD`, etc.). Keycloak em `dev-file` na demo — em produção seria Postgres dedicado.
+
 ## Observabilidade
 
 - **Actuator**: `/actuator/health`, `/actuator/metrics`
