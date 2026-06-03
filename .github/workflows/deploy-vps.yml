@@ -14,12 +14,10 @@ concurrency:
 
 jobs:
   deploy:
+    # secrets não podem ser usados em if: — cadastre VPS_HOST, VPS_USER, VPS_SSH_KEY
     if: >-
-      (github.event_name == 'workflow_dispatch' ||
-       github.event.workflow_run.conclusion == 'success') &&
-      secrets.VPS_HOST != '' &&
-      secrets.VPS_USER != '' &&
-      secrets.VPS_SSH_KEY != ''
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
