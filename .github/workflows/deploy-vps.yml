@@ -14,7 +14,6 @@ concurrency:
 
 jobs:
   deploy:
-    # secrets não podem ser usados em if: — cadastre VPS_HOST, VPS_USER, VPS_SSH_KEY
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
@@ -43,57 +42,61 @@ jobs:
           echo "app_public_url=${APP}" >> "$GITHUB_OUTPUT"
           echo "keycloak_public_url=${KC}" >> "$GITHUB_OUTPUT"
 
-      - name: Gerar .env na pasta deploy
-        env:
-          VPS_POSTGRES_PASSWORD: ${{ secrets.VPS_POSTGRES_PASSWORD }}
-          VPS_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.VPS_KEYCLOAK_ADMIN_PASSWORD }}
-        run: |
-          REGISTRY="ghcr.io/${{ github.repository }}"
-          REGISTRY="${REGISTRY,,}"
-          PG_PASS="${VPS_POSTGRES_PASSWORD:-gestao123}"
-          KC_PASS="${VPS_KEYCLOAK_ADMIN_PASSWORD:-admin}"
-          cat > deploy/.env <<EOF
-          GHCR_REGISTRY=${REGISTRY}
-          IMAGE_TAG=latest
-          SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/gestao_fiscal
-          SPRING_DATASOURCE_USERNAME=gestao
-          SPRING_DATASOURCE_PASSWORD=${PG_PASS}
-          APP_PUBLIC_URL=${{ steps.urls.outputs.app_public_url }}
-          KEYCLOAK_PUBLIC_URL=${{ steps.urls.outputs.keycloak_public_url }}
-          KEYCLOAK_ADMIN=admin
-          KEYCLOAK_ADMIN_PASSWORD=${KC_PASS}
-          EOF
-          chmod 600 deploy/.env
-
-      - name: Enviar pasta deploy para a VPS
+      - name: Enviar arquivos deploy (sem .env)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ vars.VPS_SSH_PORT || 22 }}
-          source: deploy/
-          target: ${{ vars.VPS_DEPLOY_PATH || '/opt/gestao-fiscal' }}
-          strip_components: 0
+          source: >-
+            deploy/docker-compose.yml,
+            deploy/deploy.sh,
+            deploy/patch-realm.py,
+            deploy/config/keycloak/realm-entrevista.json,
+            deploy/config/nginx/nginx.conf,
+            deploy/config/theme/corporate.css
+          target: ${{ vars.VPS_DEPLOY_PATH || '/opt/gestao-fiscal/deploy' }}
+          strip_components: 1
           overwrite: true
 
       - name: Executar deploy na VPS
         uses: appleboy/ssh-action@v1.2.0
         env:
           APP_URL: ${{ steps.urls.outputs.app_public_url }}
+          KEYCLOAK_PUBLIC_URL: ${{ steps.urls.outputs.keycloak_public_url }}
+          GHCR_REGISTRY: ghcr.io/${{ github.repository }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
           GHCR_USER: ${{ github.repository_owner }}
+          VPS_POSTGRES_PASSWORD: ${{ secrets.VPS_POSTGRES_PASSWORD }}
+          VPS_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.VPS_KEYCLOAK_ADMIN_PASSWORD }}
           DEPLOY_DIR: ${{ vars.VPS_DEPLOY_PATH || '/opt/gestao-fiscal/deploy' }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ vars.VPS_SSH_PORT || 22 }}
-          envs: APP_URL,GHCR_TOKEN,GHCR_USER,DEPLOY_DIR
+          envs: APP_URL,KEYCLOAK_PUBLIC_URL,GHCR_REGISTRY,GHCR_TOKEN,GHCR_USER,VPS_POSTGRES_PASSWORD,VPS_KEYCLOAK_ADMIN_PASSWORD,DEPLOY_DIR
           script: |
             set -euo pipefail
+            mkdir -p "$DEPLOY_DIR/config/keycloak" "$DEPLOY_DIR/config/nginx" "$DEPLOY_DIR/config/theme"
             cd "$DEPLOY_DIR"
             chmod +x deploy.sh patch-realm.py
+            REGISTRY="${GHCR_REGISTRY,,}"
+            PG_PASS="${VPS_POSTGRES_PASSWORD:-gestao123}"
+            KC_PASS="${VPS_KEYCLOAK_ADMIN_PASSWORD:-admin}"
+            {
+              echo "GHCR_REGISTRY=${REGISTRY}"
+              echo "IMAGE_TAG=latest"
+              echo "SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/gestao_fiscal"
+              echo "SPRING_DATASOURCE_USERNAME=gestao"
+              echo "SPRING_DATASOURCE_PASSWORD=${PG_PASS}"
+              echo "APP_PUBLIC_URL=${APP_URL}"
+              echo "KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_URL}"
+              echo "KEYCLOAK_ADMIN=admin"
+              echo "KEYCLOAK_ADMIN_PASSWORD=${KC_PASS}"
+            } > .env
+            chmod 600 .env
             if [[ -n "${GHCR_TOKEN:-}" ]]; then
               echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             fi
