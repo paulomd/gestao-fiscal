@@ -6,10 +6,10 @@ Aplicação demonstrativa de **evolução tecnológica gradual**: módulos legad
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Gateway Nginx (:80)                       │
+│                    Gateway Nginx (:80)                      │
 │  /dashboard.xhtml, /aliquotas.xhtml  →  frontend-jsf        │
 │  /apuracao-fiscal, /historico      →  frontend-angular      │
-│  /api/*                              →  backend               │
+│  /api/*                              →  backend             │
 └─────────────────────────────────────────────────────────────┘
          │                    │                    │
          ▼                    ▼                    ▼
@@ -170,15 +170,19 @@ Acesse JSF em `http://localhost:8081` e Angular em `http://localhost:4200`, ou c
 - **Logs estruturados** (Logstash encoder)
 - **Tratamento global de exceções** (`GlobalExceptionHandler`)
 
-## CI/CD
+## CI/CD e deploy na VPS
 
-Pipeline GitHub Actions (`.github/workflows/ci.yml`):
+| Workflow | Quando | O quê |
+|----------|--------|--------|
+| `ci.yml` | PR e push | Testes + validação Docker |
+| `publish-images.yml` | CI ok em `main` | Push `ghcr.io/paulomd/gestao-fiscal/{backend,jsf,angular}` |
+| `deploy-vps.yml` | Após publish | SSH → pasta `deploy/` → `docker compose up` |
 
-1. Build e testes do backend
-2. Build JSF
-3. Build Angular
-4. Análise estática (SpotBugs)
-5. Build das imagens Docker
+**Variables:** `APP_PUBLIC_URL`, `KEYCLOAK_PUBLIC_URL` (ex. `http://IP` e `http://IP:8180`).
+
+**Secrets (deploy SSH):** `VPS_HOST` (só IP), `VPS_USER`, `VPS_SSH_KEY` (chave privada). Opcional: `VPS_POSTGRES_PASSWORD`, `VPS_KEYCLOAK_ADMIN_PASSWORD`, `GHCR_TOKEN` (imagens privadas).
+
+**VPS:** Docker instalado, porta **8180** livre; **80** não pode conflitar com outro nginx (ver issue no host). Pacotes GHCR públicos ou `GHCR_TOKEN`.
 
 ## Uso de IA no desenvolvimento
 

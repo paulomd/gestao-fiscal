@@ -71,9 +71,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - name: Build Backend Image
-        run: docker build -t gestao-fiscal-backend:ci ./backend
-      - name: Build JSF Image
-        run: docker build -f frontend-jsf/Dockerfile -t gestao-fiscal-jsf:ci .
-      - name: Build Angular Image
-        run: docker build -f frontend-angular/Dockerfile -t gestao-fiscal-angular:ci .
+      - name: Validar build das imagens Docker
+        run: |
+          docker build -t gestao-fiscal-backend:ci ./backend
+          docker build -f frontend-jsf/Dockerfile -t gestao-fiscal-jsf:ci .
+          docker build -f frontend-angular/Dockerfile -t gestao-fiscal-angular:ci .
+      # Publicação no GHCR: workflow publish-images.yml (push em main/master)

@@ -1,0 +1,95 @@
+{
+  "realm": "entrevista",
+  "enabled": true,
+  "displayName": "Sistema de Gestão Fiscal",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["pt-BR", "pt", "en"],
+  "defaultLocale": "pt-BR",
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak",
+  "emailTheme": "keycloak",
+  "roles": {
+    "realm": [
+      { "name": "ADMIN", "description": "Administrador do sistema" },
+      { "name": "FISCAL", "description": "Analista fiscal" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "legacy-jsf",
+      "name": "Módulo Legado JSF",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "legacy-jsf-secret",
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost:80/*",
+        "http://localhost:8081/*",
+        "http://127.0.0.1/*",
+        "http://127.0.0.1:8081/*",
+        "http://localhost/login/oauth2/code/keycloak",
+        "http://localhost:8081/login/oauth2/code/keycloak"
+      ],
+      "webOrigins": ["http://localhost", "http://localhost:8081", "http://127.0.0.1", "http://127.0.0.1:8081", "+"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost/*##http://localhost:8081/*##http://localhost/login-jsf##http://127.0.0.1/*"
+      },
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "angular-app",
+      "name": "Módulo Angular",
+      "enabled": true,
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost/dashboard-angular",
+        "http://localhost:4200/*",
+        "http://127.0.0.1/*"
+      ],
+      "webOrigins": ["http://localhost", "http://localhost:4200", "http://127.0.0.1", "+"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost/*##http://localhost/login-jsf##http://localhost/dashboard-angular"
+      },
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "backend-api",
+      "name": "API Backend",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect"
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Administrador",
+      "lastName": "Sistema",
+      "email": "admin@entrevista.local",
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "realmRoles": ["ADMIN", "FISCAL"]
+    },
+    {
+      "username": "fiscal",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Analista",
+      "lastName": "Fiscal",
+      "email": "fiscal@entrevista.local",
+      "credentials": [{ "type": "password", "value": "fiscal123", "temporary": false }],
+      "realmRoles": ["FISCAL"]
+    }
+  ]
+}

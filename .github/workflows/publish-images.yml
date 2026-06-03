@@ -1,0 +1,124 @@
+name: Publish Docker images
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      app_public_url:
+        description: "URL pública da VPS (ex. http://203.0.113.10) — embute no build do Angular"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Resolver URLs públicas (build do Angular)
+        id: urls
+        run: |
+          APP="${{ inputs.app_public_url || vars.APP_PUBLIC_URL || 'http://localhost' }}"
+          APP="${APP%/}"
+          scheme="${APP%%://*}"
+          rest="${APP#*://}"
+          host="${rest%%/*}"
+          KC="${{ vars.KEYCLOAK_PUBLIC_URL }}"
+          if [[ -z "$KC" ]]; then
+            KC="${scheme}://${host}:8180"
+          fi
+          echo "app_public_url=${APP}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_public_url=${KC}" >> "$GITHUB_OUTPUT"
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Metadados backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/backend
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Metadados JSF
+        id: meta-jsf
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/jsf
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Push JSF
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend-jsf/Dockerfile
+          push: true
+          tags: ${{ steps.meta-jsf.outputs.tags }}
+          labels: ${{ steps.meta-jsf.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Metadados Angular
+        id: meta-angular
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/angular
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Push Angular
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend-angular/Dockerfile
+          push: true
+          tags: ${{ steps.meta-angular.outputs.tags }}
+          labels: ${{ steps.meta-angular.outputs.labels }}
+          build-args: |
+            KEYCLOAK_URL=${{ steps.urls.outputs.keycloak_public_url }}
+            JSF_BASE_URL=${{ steps.urls.outputs.app_public_url }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resumo
+        run: |
+          echo "Imagens: ${{ env.REGISTRY }}/${{ github.repository }}/{backend,jsf,angular}"
+          echo "Tags: latest + SHA"
+          echo "APP_PUBLIC_URL=${{ steps.urls.outputs.app_public_url }}"
+          echo "KEYCLOAK_PUBLIC_URL=${{ steps.urls.outputs.keycloak_public_url }}"

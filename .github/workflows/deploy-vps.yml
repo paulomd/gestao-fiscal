@@ -1,0 +1,102 @@
+# Deploy automático na VPS via SSH (após publicar imagens no GHCR).
+# Secrets: VPS_HOST, VPS_USER, VPS_SSH_KEY | Variables: APP_PUBLIC_URL, KEYCLOAK_PUBLIC_URL
+name: Deploy VPS
+
+on:
+  workflow_run:
+    workflows: ["Publish Docker images"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      (github.event_name == 'workflow_dispatch' ||
+       github.event.workflow_run.conclusion == 'success') &&
+      secrets.VPS_HOST != '' &&
+      secrets.VPS_USER != '' &&
+      secrets.VPS_SSH_KEY != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: URLs públicas
+        id: urls
+        run: |
+          APP="${{ vars.APP_PUBLIC_URL }}"
+          APP="${APP%/}"
+          if [[ -z "$APP" || "$APP" == "http://localhost" ]]; then
+            echo "::error::Defina a variable APP_PUBLIC_URL (IP/domínio da VPS)."
+            exit 1
+          fi
+          scheme="${APP%%://*}"
+          rest="${APP#*://}"
+          host="${rest%%/*}"
+          KC="${{ vars.KEYCLOAK_PUBLIC_URL }}"
+          if [[ -z "$KC" ]]; then
+            KC="${scheme}://${host}:8180"
+          fi
+          echo "app_public_url=${APP}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_public_url=${KC}" >> "$GITHUB_OUTPUT"
+
+      - name: Gerar .env na pasta deploy
+        env:
+          VPS_POSTGRES_PASSWORD: ${{ secrets.VPS_POSTGRES_PASSWORD }}
+          VPS_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.VPS_KEYCLOAK_ADMIN_PASSWORD }}
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository }}"
+          REGISTRY="${REGISTRY,,}"
+          PG_PASS="${VPS_POSTGRES_PASSWORD:-gestao123}"
+          KC_PASS="${VPS_KEYCLOAK_ADMIN_PASSWORD:-admin}"
+          cat > deploy/.env <<EOF
+          GHCR_REGISTRY=${REGISTRY}
+          IMAGE_TAG=latest
+          SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/gestao_fiscal
+          SPRING_DATASOURCE_USERNAME=gestao
+          SPRING_DATASOURCE_PASSWORD=${PG_PASS}
+          APP_PUBLIC_URL=${{ steps.urls.outputs.app_public_url }}
+          KEYCLOAK_PUBLIC_URL=${{ steps.urls.outputs.keycloak_public_url }}
+          KEYCLOAK_ADMIN=admin
+          KEYCLOAK_ADMIN_PASSWORD=${KC_PASS}
+          EOF
+          chmod 600 deploy/.env
+
+      - name: Enviar pasta deploy para a VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ vars.VPS_SSH_PORT || 22 }}
+          source: deploy/
+          target: ${{ vars.VPS_DEPLOY_PATH || '/opt/gestao-fiscal' }}
+          strip_components: 0
+          overwrite: true
+
+      - name: Executar deploy na VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          APP_URL: ${{ steps.urls.outputs.app_public_url }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_USER: ${{ github.repository_owner }}
+          DEPLOY_DIR: ${{ vars.VPS_DEPLOY_PATH || '/opt/gestao-fiscal/deploy' }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ vars.VPS_SSH_PORT || 22 }}
+          envs: APP_URL,GHCR_TOKEN,GHCR_USER,DEPLOY_DIR
+          script: |
+            set -euo pipefail
+            cd "$DEPLOY_DIR"
+            chmod +x deploy.sh patch-realm.py
+            if [[ -n "${GHCR_TOKEN:-}" ]]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            fi
+            ./deploy.sh "$APP_URL"
