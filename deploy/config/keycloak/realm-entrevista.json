@@ -2,7 +2,7 @@
   "realm": "entrevista",
   "enabled": true,
   "displayName": "Sistema de Gestão Fiscal",
-  "sslRequired": "external",
+  "sslRequired": "none",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "internationalizationEnabled": true,

@@ -34,7 +34,7 @@ services:
       KC_HTTP_RELATIVE_PATH: /
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_PROXY: edge
+      KC_PROXY: none
       KC_HEALTH_ENABLED: "true"
     ports:
       - "8180:8080"
